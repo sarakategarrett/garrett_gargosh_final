@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}DIY Money {% endblock %}
+
+{% block nav_active_asset_class %}active" aria-current"page{% endblock %}
+
+{% block body %}
+<!-- Header - set the background image for the header in the line below-->
+        <header class="py-5 bg-image-full" style="background-image: url('https://www.investopedia.com/thmb/l__0yRGdXNiac8kUY8Mj2LxF2uU=/2301x1303/filters:fill(auto,1)/GettyImages-1220909109-00cd067f887a48408340f54ddf0ecb1d.jpg')">
+            <div class="text-center my-5">
+                <h1 class="text-white fs-2 fw-bolder btn-dark btn-lg">Welcome to DIY Money</h1>
+            </div>
+        </header>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+
+        {% for message in messages %}
+            <div class="alert alert-danger alert-dismissable fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><</button>
+
+
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<br>
+<h1>Asset Classes
+    <br>
+<button type="button" class="btn btn-success btn-lg btn-block" data-bs-toggle="modal" data-bs-target="#add_asset_class">Add Asset Class</button>
+</h1>
+<br>
+
+
+<!-- add asset modal -->
+<div class="modal fade" id="add_asset_class" aria-labelledby="add_asset_classLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="add_modalLabel">Add Asset</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="{{ url_for('asset') }}" method="POST" novalidate>
+                        <div class="modal-body">
+                                {{ form.hidden_tag() }}
+                            <p>
+                                {{ form.asset_class_name.label }}<br>
+                                {{ form.asset_class_name(size=32) }}
+                                {% for error in form.asset_class_name.errors %}
+                                <span style="color: red;">[{{ error }}] </span>
+                                {% endfor %}
+                            </p>
+                            <p>
+                                {{ form.allocation_percent.label }}<br>
+                                {{ form.allocation_percent(size=52) }}
+                                {% for error in form.allocation_percent.errors %}
+                                <span style="color: red;">[{{ error }}] </span>
+                                {% endfor %}
+                            </p>
+                            <p> {{ form.submit(class="btn btn-success") }} </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+</div>
+
+
+<table class = 'table'>
+    <thead>
+        <th scope="col">Name</th>
+        <th scope="col">Date</th>
+    </thead>
+        {% for asset in assets %}
+    <tr>
+        {% if not asset.date  %}
+        <td align="left"> {{ asset.asset_class_name }}</td>
+        <td align="left"> {{ asset.allocation_percent }}</td>
+        {% else %}
+        <td align="left"> {{ asset.asset_class_name }}</td>
+        <td align="left"> {{ asset.allocation_percent | percentageFormat }}</td>
+        {% endif %}
+        <td>
+<!--update model -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#update_modal{{asset.asset_class_id}}">Update Info</button>
+            <div class="modal fade" id="update_modal{{asset.asset_class_id}}" aria-labelledby="update_modalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="update_modalLabel">Update Info</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form action="{{url_for('asset_update', id=asset.asset_class_id)}}" method="POST" novalidate>
+                            <div class="modal-body">
+                                <p>
+                                    <label for="asset_class_name">Name:</label><br>
+                                    <input type="text" id="asset_class_name" name="allocation_percent" value="{{ asset.asset_class_name }}">
+                                </p>
+                                <p>
+                                    <label for="allocation_percent">Allocation Percent:</label><br>
+                                    <input type="text" id="allocation_percent" name="allocation_percent" value="{{ asset.allocation_percent }}"
+                                </p>
+                            </div>
+                                <div class ='modal-footer'>
+                                    <input type="submit" class="btn btn-success" value="Submit">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+<!-- Delete button and modal -->
+
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_modal{{asset.asset_class_id}}">Delete</button>
+            <div class="modal fade" id="delete_modal{{asset.asset_class_id}}" aria-labelledby="delete_modalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="delete_modalLabel">Delete Item</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form action="{{url_for('asset_delete', id=asset.asset_class_id)}}" method="POST" novalidate>
+                            <div class="modal-body">
+                                <p>Are you sure you want to delete {{ asset.name}}? This can't be undone. </p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form action="/asset_delete/3/" }} method="POST" novalidate>
+                                    <input type="submit" class="btn btn-danger" value="Delete">
+                                </form>
+                            </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
